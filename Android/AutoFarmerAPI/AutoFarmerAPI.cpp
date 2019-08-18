@@ -30,7 +30,7 @@ QJsonObject AutoFarmerAPI::initEnv(const QString token, const APPNAME_ID appname
     if(token == ""){
         message = "Token is invalid";
         retVal = false;
-    }else if(appnameId >= APPNAME_ID_FACEBOOK && appnameId <= APPNAME_ID_TWITTER){
+    }else if(appnameId >= APPNAME_ID_FACEBOOK && appnameId <= APPNAME_ID_FBLITE){
         message = "App Name is invalid";
         retVal = false;
     }else{
@@ -67,49 +67,525 @@ QJsonObject AutoFarmerAPI::getConfig()
     QJsonObject inputJson;
     QJsonObject retVal;
 
+    bool status;
+    QString message = "";
+
+    if(this->token() == ""){
+        message = "Token is invalid";
+        status = false;
+    }else if(this->appnameID() >= APPNAME_ID_FACEBOOK && this->appnameID() <= APPNAME_ID_FBLITE){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+
+        QString url = API_SERVER + QString("config?token=%1").arg(this->token());
+        QUrl serviceUrl = QUrl(url);
+        QNetworkRequest request(serviceUrl);
+
+        inputJson.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("config")));
+        inputJson.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+        QByteArray jsonData = QJsonDocument(inputJson).toJson();
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+
+            if(jsonObj.isEmpty()){
+                // Do nothing
+            }else{
+                QString data =  jsonObj["data"].toString();
+
+                QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), this->getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                retVal = QJsonDocument::fromJson(encryption.removePadding(decodeText)).object();
+            }
+        }
+
+        reply->deleteLater();
+        networkManager->deleteLater();
+    }
+
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 102000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
+}
+
+QJsonObject AutoFarmerAPI::getApk()
+{
     QString url = API_SERVER + QString("config?token=%1").arg(this->token());
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
+    QJsonObject json;
+    QJsonObject retVal;
 
-    inputJson.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("config")));
-    inputJson.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+    bool status;
+    QString message = "";
 
-    QByteArray jsonData = QJsonDocument(inputJson).toJson();
-    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
-    request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
-
-    QEventLoop evenlopp;
-    QNetworkAccessManager* networkManager = new QNetworkAccessManager();
-    QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
-            &evenlopp, SLOT(quit()));
-    QNetworkReply* reply = networkManager->post(request, jsonData);
-    evenlopp.exec();
-
-    QByteArray responseData = reply->readAll();
-    QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
-
-    if(jsonObj.isEmpty()){
-        LOG_WARN << "jsonObj is empty!";
-        return retVal;
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
     }else{
-        // Continue
+
+        json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("getapk")));
+        json.insert("appname", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(this->getAppName())));
+        json.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+        QByteArray jsonData = QJsonDocument(json).toJson();
+
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+
+
+            if(jsonObj.isEmpty()){
+                // Do nothing
+            }else{
+                    QString data =  jsonObj["data"].toString();
+                    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                    QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                    retVal = QJsonDocument::fromJson(encryption.removePadding(decodeText)).object();
+            }
+        }
+
+        reply->deleteLater();
+        networkManager->deleteLater();
     }
-
-    if(jsonObj["action"].toString() == QTextCodec::codecForMib(106)->toUnicode(this->getEncodedString("config"))){
-        QString data =  jsonObj["data"].toString();
-
-        QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
-        QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), this->getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
-        retVal = QJsonDocument::fromJson(encryption.removePadding(decodeText)).object();
-    }else{
-        LOG_WARN << "Another action!";
-    }
-
-    reply->deleteLater();
-    networkManager->deleteLater();
-
-    return retVal;
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 103000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
 }
+
+QJsonObject AutoFarmerAPI::downloadApk(QString url)
+{
+
+    bool status;
+    QString retVal = "";
+    QString message = "";
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->get(QNetworkRequest(QUrl(url)));
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+            QByteArray content = reply->readAll();
+            if(content.isEmpty())
+            {
+                message = "Responed content is empty";
+            }else{
+                if(url.split("/").last().contains("com.facebook")){
+                    QString fileName = url.split("/").last();
+                    QString pathName = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/" + fileName;;
+                    QFile *file = new QFile(pathName);
+                    if(file->open(QIODevice::WriteOnly | QIODevice::Text))
+                    {
+                        file->write(content);
+                        file->flush();
+                        file->close();
+                    }else{
+                        status = false;
+                        message = "Failed to open file";
+                    }
+                    delete file;
+                    retVal = pathName;
+                }
+            }
+        }
+    }
+
+
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 100000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
+}
+
+QJsonObject AutoFarmerAPI::getClone()
+{
+    QString url = API_SERVER + QString("CloneInfo?token=%1").arg(this->token());
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+    QJsonObject retVal;
+    QJsonObject json;
+
+    bool status;
+    QString message = "";
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+        json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("GetClone")));
+        json.insert("country", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("VN")));
+        json.insert("appname", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(this->getAppName())));
+        json.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+        QByteArray jsonData = QJsonDocument(json).toJson();
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+            if(jsonObj.isEmpty()){
+                retVal = QJsonObject();
+            }else{
+                    QString data =  jsonObj["data"].toString();
+                    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                    QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                    QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+                    retVal = jdoc.object();
+            }
+        }
+        reply->deleteLater();
+        networkManager->deleteLater();
+    }
+
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 103000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
+}
+
+QJsonObject AutoFarmerAPI::getCloneInfo()
+{
+    QString url = API_SERVER + QString("CloneInfo?token=%1").arg(this->token());
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+    QJsonObject retVal;
+    QJsonObject json;
+
+    bool status;
+    QString message = "";
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+
+        json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("GetCloneInfo")));
+        json.insert("country", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("VN")));
+        json.insert("appname", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(this->getAppName())));
+        json.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+        QByteArray jsonData = QJsonDocument(json).toJson();
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+            if(jsonObj.isEmpty()){
+                retVal = QJsonObject();
+            }else{
+                    QString data =  jsonObj["data"].toString();
+                    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                    QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                    QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+                    retVal = jdoc.object();
+            }
+        }
+        reply->deleteLater();
+        networkManager->deleteLater();
+    }
+
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 102000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
+}
+
+QJsonObject AutoFarmerAPI::postClone(QJsonObject data)
+{
+    QString url = API_SERVER + QString("CloneInfo?token=%1").arg(this->token());
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+    QJsonObject retVal;
+    QJsonObject json;
+
+    bool status;
+    QString message = "";
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+        json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("PostClone")));
+        json.insert("country", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("VN")));
+        json.insert("appname", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(this->getAppName())));
+        json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedJsonDoc(QJsonDocument(data))));
+        json.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+        QByteArray jsonData = QJsonDocument(json).toJson();
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+            if(jsonObj.isEmpty()){
+                retVal = QJsonObject();
+            }else{
+                QString data =  jsonObj["data"].toString();
+                QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+                retVal = jdoc.object();
+            }
+        }
+        reply->deleteLater();
+        networkManager->deleteLater();
+    }
+
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 102000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
+}
+
+QJsonObject AutoFarmerAPI::doAction(QString fbId)
+{
+    QString url = API_SERVER + QString("DoAction?token=%1").arg(this->token());
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+    QJsonObject retVal;
+    QJsonObject json;
+
+    bool status;
+    QString message = "";
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+
+        json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(fbId)));
+        json.insert("appname", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(this->getAppName())));
+        json.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+        QByteArray jsonData = QJsonDocument(json).toJson();
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+            if(jsonObj.isEmpty()){
+                // Do nothing
+            }else{
+                QString data =  jsonObj["data"].toString();
+
+                QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+                retVal = jdoc.object();
+            }
+        }
+        reply->deleteLater();
+        networkManager->deleteLater();
+    }
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 102000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;
+}
+
+QJsonObject AutoFarmerAPI::doResult(QString fbId, QJsonObject data)
+{
+    QString url = API_SERVER + QString("DoResult?token=%1").arg(this->token());
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+    QJsonObject retVal;
+    QJsonObject json;
+
+    bool status;
+    QString message = "";
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+        status = false;
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+        status = false;
+    }else{
+
+        json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(fbId)));
+        json.insert("appname", QTextCodec::codecForMib(106)->toUnicode(getEncodedString(this->getAppName())));
+        json.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+        json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedJsonDoc(QJsonDocument(data))));
+
+        QByteArray jsonData = QJsonDocument(json).toJson();
+        request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+        request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+
+        QEventLoop evenlopp;
+        QNetworkAccessManager* networkManager = new QNetworkAccessManager();
+        QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+                         &evenlopp, SLOT(quit()));
+        QNetworkReply* reply = networkManager->post(request, jsonData);
+        evenlopp.exec();
+
+        QNetworkReply::NetworkError error = reply->error();
+        if(error != QNetworkReply::NoError){
+            status = false;
+            message = reply->errorString();
+        }else{
+            status = true;
+
+            QByteArray responseData = reply->readAll();
+            QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+            if(jsonObj.isEmpty()){
+                // Do nothing
+            }else{
+                QString data =  jsonObj["data"].toString();
+
+                QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+                QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+                QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+                retVal = jdoc.object();
+            }
+        }
+        reply->deleteLater();
+        networkManager->deleteLater();
+    }
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 102000},
+        {"Message", message},
+        {"ResponseData", retVal},
+    };
+    return object;}
 
 QJsonObject AutoFarmerAPI::doClick(int x, int y)
 {
@@ -431,7 +907,7 @@ bool AutoFarmerAPI::validToken()
 
 bool AutoFarmerAPI::validAppname()
 {
-    return (m_appnameID >= APPNAME_ID_FACEBOOK && m_appnameID <= APPNAME_ID_TWITTER);
+    return (m_appnameID >= APPNAME_ID_FACEBOOK && m_appnameID <= APPNAME_ID_FBLITE);
 }
 
 QString AutoFarmerAPI::token() const
@@ -452,6 +928,26 @@ DEVICE_TYPE AutoFarmerAPI::deviceType() const
 DEVICE_INFO AutoFarmerAPI::deviceInfo() const
 {
     return m_deviceInfo;
+}
+
+QString AutoFarmerAPI::getAppName() const
+{
+    switch (this->appnameID()) {
+    case APPNAME_ID_FACEBOOK:
+        return "Facebook";
+    case APPNAME_ID_INSTAGRAM:
+        return "Instagram";
+    case APPNAME_ID_ZALO:
+        return "Zalo";
+    case APPNAME_ID_PRINTERTEST:
+        return "Pinterest";
+    case APPNAME_ID_TWITTER:
+        return "Twitter";
+    case APPNAME_ID_FBLITE:
+        return "FBLite";
+    default:
+        return "";
+    }
 }
 
 QString AutoFarmerAPI::getKeyByToken() const

@@ -38,6 +38,60 @@ public:
      */
     QJsonObject getConfig();
 
+    /** @brief Get list apks from Server.
+     *  @param No input.
+     *  @return QObject object {
+     *      {
+     *      “appname”:”Facebook”
+     *      "package": "com.facebook.liup",
+     *      "apk": "https://admin.autofarmer.xyz/apks/com.facebook.liup-134.0.0.9.90.apk"
+     *      },
+     *      {
+     *      “appname”:”Facebook”
+     *      "package": "com.facebook.livt",
+     *      "apk": "https://admin.autofarmer.xyz/apks/com.facebook.livt-134.0.0.9.90.apk"
+     *      },
+     *      }
+     */
+    QJsonObject getApk();
+
+    /** @brief Download APK from Server.
+     *  @param url: the link of apk.
+     *  @return QString: Path to saved apk
+     */
+    QJsonObject downloadApk(QString url);
+
+    /** @brief Get clone from Server.
+     *  @param No input.
+     *  @return QJsonObject
+     */
+    QJsonObject getClone();
+
+    /** @brief Get the information of clone from Server.
+     *  @param No input.
+     *  @return QJsonObject
+     */
+    QJsonObject getCloneInfo();
+
+    /** @brief Post clone to Server.
+     *  @param data: Info of clone which is needed to post.
+     *  @return QJsonObject
+     */
+    QJsonObject postClone(QJsonObject data);
+
+    /** @brief Get actions for specified FB id.
+     *  @param fbId: UID of specified clone.
+     *  @return QJsonObject
+     */
+    QJsonObject doAction(QString fbId);
+
+    /** @brief Update result to server when an anction is done
+     *  @param fbId: UID of specified clone.
+     *  @param data: action was done.
+     *  @return QJsonObject
+     */
+    QJsonObject doResult(QString fbId, QJsonObject data);
+
     /** @brief Touch any position on the screen.
      *  @param x,y The coordinates which you want to touch.
      *  @return QJsonObject object{
@@ -46,6 +100,8 @@ public:
      *                              {"Message", message}
      *                            };.
      */
+
+
     QJsonObject doClick(int x, int y);
 
     /** @brief Swipe from A point to B point around delay miliseconds.
@@ -168,6 +224,7 @@ private:
     APPNAME_ID appnameID() const;
     DEVICE_TYPE deviceType() const;
     DEVICE_INFO deviceInfo() const;
+    QString getAppName() const;
     QString getKeyByToken() const;
     QString getKeyByIMEI() const;
     QString getIV() const;

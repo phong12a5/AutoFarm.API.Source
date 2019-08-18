@@ -1,4 +1,0 @@
-#Sat Aug 17 17:31:20 ICT 2019
-base.0=G\:\\WorkSpace\\QT_Project\\QtAndroid\\AutoFarmer.API.Source\\AutoFarmAPIs\\android-build\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main
-renamed.0=classes.dex
-file.0=G\:\\WorkSpace\\QT_Project\\QtAndroid\\AutoFarmer.API.Source\\AutoFarmAPIs\\android-build\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main\\classes.dex
