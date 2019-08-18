@@ -40,39 +40,33 @@ HEADERS += \
 
 
     INCLUDEPATH += "$$_PRO_FILE_PWD_/OpenCV-android-sdk/sdk/native/jni/include"
-    LIBS += \
-        -L"$$_PRO_FILE_PWD_/OpenCV-android-sdk/sdk/native/3rdparty/libs/armeabi-v7a"\
-        -L"$$_PRO_FILE_PWD_/OpenCV-android-sdk/sdk/native/libs/armeabi-v7a"\
-        -llibtiff\
-        -llibjpeg\
-        -llibjasper\
-        -llibpng\
-        -lIlmImf\
-        -ltbb\
-        -lopencv_core\
-        -lopencv_androidcamera\
-        -lopencv_flann\
-        -lopencv_imgproc\
-        -lopencv_highgui\
-        -lopencv_features2d\
-        -lopencv_calib3d\
-        -lopencv_ml\
-        -lopencv_objdetect\
-        -lopencv_video\
-        -lopencv_contrib\
-        -lopencv_photo\
-        -lopencv_java\
-        -lopencv_legacy\
-        -lopencv_ocl\
-        -lopencv_stitching\
-        -lopencv_superres\
-        -lopencv_ts\
-        -lopencv_videostab
-
-LIBS += -L$$PWD/OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_core.a
 
 
-unix {
-    target.path = /libs/$$ANDROID_TARGET_ARCH
+# install AutoFarmer API lib
+    target.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
     INSTALLS += target
-}
+
+# Coppy header files to include folder
+    target_headers.files  = $$PWD/*.hpp
+    target_headers.path   = /AutoFarmer.API/Android/include/
+    INSTALLS              += target_headers
+
+# Coppy opencv libs
+    opencv_static_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
+    opencv_static_lib.files = $$PWD/OpenCV-android-sdk/sdk/native/libs/$$ANDROID_TARGET_ARCH/*.a
+    INSTALLS += opencv_static_lib
+
+    opencv_shared_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
+    opencv_shared_lib.files = $$PWD/OpenCV-android-sdk/sdk/native/libs/$$ANDROID_TARGET_ARCH/libopencv_java.so
+    INSTALLS += opencv_shared_lib
+
+# Coppy opencv 3rd-party libs
+
+    opencv3rd_static_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
+    opencv3rd_static_lib.files = $$PWD/OpenCV-android-sdk/sdk/native/3rdparty/libs/$$ANDROID_TARGET_ARCH/*.a
+    INSTALLS += opencv3rd_static_lib
+
+# Coppy open-ssl libs
+    openssl_shared_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
+    openssl_shared_lib.files = $$PWD/android_openssl-1.0.x/$$QT_ARCH/*.so
+    INSTALLS += openssl_shared_lib

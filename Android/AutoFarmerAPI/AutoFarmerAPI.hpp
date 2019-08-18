@@ -243,7 +243,6 @@ private:
     QString m_token;
     DEVICE_INFO m_deviceInfo;
     DEVICE_TYPE m_deviceType;
-
 };
 
 #endif // AUTOFARMERAPI_H
