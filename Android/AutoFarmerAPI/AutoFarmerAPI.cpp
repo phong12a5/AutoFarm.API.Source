@@ -10,7 +10,7 @@
 #include "SamsungAPIs.hpp"
 #include "ImageProcessing.hpp"
 
-#define API_SERVER              "https://api.autofarmer.xyz/api/"
+#define API_SERVER              "https://api.autofarmer.xyz/api/v2/"
 
 
 AutoFarmerAPI::AutoFarmerAPI()
@@ -27,15 +27,17 @@ QJsonObject AutoFarmerAPI::initEnv(const QString token, const APPNAME_ID appname
     bool retVal;
     QString message = "";
 
-    if(token == ""){
+    m_token = token;
+    m_appnameID = appnameId;
+
+    if(!this->validToken()){
         message = "Token is invalid";
         retVal = false;
-    }else if(appnameId >= APPNAME_ID_FACEBOOK && appnameId <= APPNAME_ID_FBLITE){
-        message = "App Name is invalid";
+    }else if(!this->validAppname()){
+        message = "AppName is invalid";
         retVal = false;
     }else{
-        m_token = token;
-        m_appnameID = appnameId;
+
 
         /* ----- Check deviceType ----- */
         QString deviceName = RootedDeviceAPIs::getDeviceModel();
@@ -70,10 +72,10 @@ QJsonObject AutoFarmerAPI::getConfig()
     bool status;
     QString message = "";
 
-    if(this->token() == ""){
+    if(!this->validToken()){
         message = "Token is invalid";
         status = false;
-    }else if(this->appnameID() >= APPNAME_ID_FACEBOOK && this->appnameID() <= APPNAME_ID_FBLITE){
+    }else if(!this->validAppname()){
         message = "App Name is invalid";
         status = false;
     }else{
@@ -83,7 +85,7 @@ QJsonObject AutoFarmerAPI::getConfig()
         QNetworkRequest request(serviceUrl);
 
         inputJson.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("config")));
-        inputJson.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+        inputJson.insert("info", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
 
         QByteArray jsonData = QJsonDocument(inputJson).toJson();
         request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");

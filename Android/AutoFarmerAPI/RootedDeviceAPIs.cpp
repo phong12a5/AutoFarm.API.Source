@@ -97,6 +97,7 @@ QString RootedDeviceAPIs::screenCapture(QString fullPath)
 
 DEVICE_INFO RootedDeviceAPIs::getDeviceInfo()
 {
+    RootedDeviceAPIs::requestPermission();
     DEVICE_INFO _deviceInfo;
     _deviceInfo.googleSF = RootedDeviceAPIs::getGoogleSF();
     _deviceInfo.androidID = RootedDeviceAPIs::getAndroidID();
@@ -185,7 +186,6 @@ QString RootedDeviceAPIs::getGoogleSF(){
         LOG_DEBUG << "query is NULL";
     }else{
         jint columns = query.callMethod<jint>("getColumnCount", "()I");
-        LOG_DEBUG << static_cast<int>(columns);
         if(static_cast<int>(columns) >= 2){
             jboolean moveFirst = query.callMethod<jboolean>("moveToFirst", "()Z");
             Q_UNUSED(moveFirst);
@@ -319,7 +319,6 @@ QString RootedDeviceAPIs::getDeviceType()
     }else{
         // Do nothing
     }
-    LOG_DEBUG << retVal;
     return retVal;
 }
 
