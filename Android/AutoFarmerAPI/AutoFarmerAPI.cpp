@@ -138,7 +138,7 @@ QJsonObject AutoFarmerAPI::getApk()
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
     QJsonObject json;
-    QJsonObject retVal;
+    QByteArray retVal;
 
     bool status;
     QString message = "";
@@ -183,7 +183,7 @@ QJsonObject AutoFarmerAPI::getApk()
                     QString data =  jsonObj["data"].toString();
                     QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
                     QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
-                    retVal = QJsonDocument::fromJson(encryption.removePadding(decodeText)).object();
+                    retVal = encryption.removePadding(decodeText);
             }
         }
 
@@ -194,7 +194,7 @@ QJsonObject AutoFarmerAPI::getApk()
         {"Status", status},
         {"Code", 103000},
         {"Message", message},
-        {"ResponseData", retVal},
+        {"ResponseData", QString(retVal)}
     };
     return object;
 }

@@ -48,4 +48,22 @@ typedef struct device_info_struct {
     }
 } DEVICE_INFO;
 
+typedef struct app_config_struct {
+    int timeout;
+    int reset_3g;
+    QString debug_mode;
+    int user_type;
+    QString encryption;
+
+    app_config_struct(){
+        timeout = 30;
+        reset_3g = 10;
+        debug_mode = "test";
+        user_type = 0;
+        encryption = "00110001";
+    }
+} APP_CONFIG;
+
+
+
 #endif // AUTOFARMERDEFINE_H
