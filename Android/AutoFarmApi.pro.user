@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.6.1, 2019-08-22T00:21:39. -->
+<!-- Written by QtCreator 4.6.1, 2019-08-22T02:56:56. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{2ecaa78f-3b47-4207-8ad1-bc738498e52a}</value>
+  <value type="QByteArray">{f08a69cf-691c-4ae5-8f81-bb6927994cb2}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -61,12 +61,12 @@
   <valuemap type="QVariantMap">
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Android for armeabi-v7a (GCC 4.9, Qt 5.11.0 for Android armv7)</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Android for armeabi-v7a (GCC 4.9, Qt 5.11.0 for Android armv7)</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{aad01db3-db28-424b-8ec3-0f3b85a74c92}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{788a8825-4e56-4cd0-acfe-1c279f85fcc2}</value>
    <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">G:/WorkSpace/QT_Project/QtAndroid/AutoFarmer.API.Source/build-AutoFarmApi-Android_for_armeabi_v7a_GCC_4_9_Qt_5_11_0_for_Android_armv7-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/phongdang/MyProject/AutoFarmer.API.Source/build-AutoFarmApi-Android_for_armeabi_v7a_GCC_4_9_Qt_5_11_0_for_Android_armv7-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -142,7 +142,7 @@
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">G:/WorkSpace/QT_Project/QtAndroid/AutoFarmer.API.Source/build-AutoFarmApi-Android_for_armeabi_v7a_GCC_4_9_Qt_5_11_0_for_Android_armv7-Release</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/phongdang/MyProject/AutoFarmer.API.Source/build-AutoFarmApi-Android_for_armeabi_v7a_GCC_4_9_Qt_5_11_0_for_Android_armv7-Release</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -218,7 +218,7 @@
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.2">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">G:/WorkSpace/QT_Project/QtAndroid/AutoFarmer.API.Source/build-AutoFarmApi-Android_for_armeabi_v7a_GCC_4_9_Qt_5_11_0_for_Android_armv7-Profile</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/phongdang/MyProject/AutoFarmer.API.Source/build-AutoFarmApi-Android_for_armeabi_v7a_GCC_4_9_Qt_5_11_0_for_Android_armv7-Profile</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>

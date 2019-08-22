@@ -9,6 +9,10 @@
 #include "RootedDeviceAPIs.hpp"
 #include "SamsungAPIs.hpp"
 #include "ImageProcessing.hpp"
+#include <api/baseapi.h>
+#include <allheaders.h>
+#include <QJsonArray>
+
 
 #define API_SERVER              "https://api.autofarmer.xyz/api/v2/"
 
@@ -878,10 +882,63 @@ QJsonObject AutoFarmerAPI::wipePackage(QStringList packageNames)
     return object;
 }
 
-QJsonObject AutoFarmerAPI::getTextFromImage(QString imagePath)
+QJsonObject AutoFarmerAPI::getTextFromImage(QString imagePath, QString lang)
 {
-    Q_UNUSED(imagePath);
-    return QJsonObject();
+    bool status = false;
+    QString message = "";
+    QJsonArray retVal;
+
+    if(!this->validToken()){
+        message = "Token is invalid";
+    }else if(!this->validAppname()){
+        message = "App Name is invalid";
+    }else {
+        static tesseract::TessBaseAPI *api = nullptr;
+        static int initRetval;
+        if(api == nullptr){
+            api = new tesseract::TessBaseAPI();
+            initRetval = api->Init(QDir::currentPath().toUtf8().constData(), lang.toUtf8().constData());
+        }
+
+        // Initialize tesseract-ocr with English, without specifying tessdata path
+        if (initRetval) {
+            message = "Could not initialize tesseract";
+            status = false;
+            // Destroy used object and release memory
+            api->End();
+        }else{
+            status = true;
+            Pix *image = pixRead(imagePath.toUtf8().constData());
+            api->SetImage(image);
+            Boxa* boxes = api->GetComponentImages(tesseract::RIL_TEXTLINE, true, NULL, NULL);
+            for (int i = 0; i < boxes->n; i++) {
+                BOX* box = boxaGetBox(boxes, i, L_CLONE);
+                api->SetRectangle(box->x, box->y, box->w, box->h);
+                char* ocrResult = api->GetUTF8Text();
+                int conf = api->MeanTextConf();
+                QJsonObject obj;
+                obj["index"] = i;
+                obj["x"] = box->x;
+                obj["y"] = box->x;
+                obj["width"] = box->w;
+                obj["height"] = box->h;
+                obj["confidence"] = conf;
+                obj["text"] = ocrResult;
+                retVal.append(QJsonValue(obj));
+            }
+            // Destroy used object and release memory
+            api->End();
+            pixDestroy(&image);
+        }
+    }
+
+    QJsonObject object{
+        {"Status", status},
+        {"Code", 118000},
+        {"Message", message},
+        {"ResponseData", retVal}
+    };
+    return object;
 }
 
 QJsonObject AutoFarmerAPI::findImageFromImage(QString templatePath, QString imagePath)

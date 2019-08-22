@@ -39,7 +39,32 @@ HEADERS += \
     ImageProcessing.hpp
 
 
-    INCLUDEPATH += "$$_PRO_FILE_PWD_/OpenCV-android-sdk/sdk/native/jni/include"
+    INCLUDEPATH += $$_PRO_FILE_PWD_/OpenCV-android-sdk/sdk/native/jni/include \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/android\
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/api                   \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/ccmain                \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/ccstruct              \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/ccutil                \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/classify              \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/cmake                 \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/contrib               \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/cube                  \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/cutil                 \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/dict                  \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/doc                   \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/java                  \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/neural_networks       \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/opencl                \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/snap                  \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/tessdata              \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/testing               \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/textord               \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/training              \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/viewer                \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src/wordrec
+
+INCLUDEPATH += $$PWD/tess-two/include/com_googlecode_leptonica_android/src/src \
+                $$PWD/tess-two/include/com_googlecode_tesseract_android/src
 
 
 # install AutoFarmer API lib

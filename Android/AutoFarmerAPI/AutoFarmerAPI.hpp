@@ -207,7 +207,7 @@ public:
      *  @param imagePath: The absolutetly path of image file
      *  @note: THIS METHOD HAS NOT IMPELEMTED YET.
      */
-    QJsonObject getTextFromImage(QString imagePath);
+    QJsonObject getTextFromImage(QString imagePath, QString lang = "eng");
 
     /** @brief Find a template on the image .
      *  @param templatePath: The absolutetly path of template file
