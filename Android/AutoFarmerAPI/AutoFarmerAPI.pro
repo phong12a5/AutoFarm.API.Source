@@ -95,3 +95,8 @@ INCLUDEPATH += $$PWD/tess-two/include/com_googlecode_leptonica_android/src/src \
     openssl_shared_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
     openssl_shared_lib.files = $$PWD/android_openssl-1.0.x/$$QT_ARCH/*.so
     INSTALLS += openssl_shared_lib
+
+# Coppy tess-two libs
+    tess_shared_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
+    tess_shared_lib.files = $$PWD/tess-two/libs/$$ANDROID_TARGET_ARCH/*.so
+    INSTALLS += tess_shared_lib
