@@ -64,6 +64,37 @@ typedef struct app_config_struct {
     }
 } APP_CONFIG;
 
+typedef struct TEXT_COMPOENT {
+    int x;
+    int y;
+    int width;
+    int height;
+    int confidence;
+    QString text;
+
+    text_component(){
+        x = 0;
+        y = 0;
+        width = 0;
+        height = 0;
+        confidence = 0;
+        text = "";
+    }
+
+    bool operator ==(TEXT_COMPOENT& input){
+        if(this->x          == input.x          &&\
+           this->y          == input.y          &&\
+           this->width      == input.width      &&\
+           this->height     == input.height     &&\
+           this->confidence == input.confidence &&\
+           this->text       == input.text)
+        {
+            return true;
+        }else{
+            return false;
+        }
+    }
+};
 
 
 #endif // AUTOFARMERDEFINE_H
