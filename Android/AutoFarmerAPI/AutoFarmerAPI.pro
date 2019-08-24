@@ -100,3 +100,8 @@ INCLUDEPATH += $$PWD/tess-two/include/com_googlecode_leptonica_android/src/src \
     tess_shared_lib.path = /AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH
     tess_shared_lib.files = $$PWD/tess-two/libs/$$ANDROID_TARGET_ARCH/*.so
     INSTALLS += tess_shared_lib
+
+# Coppy tess-two trained data
+    tesstrained_data.path = /AutoFarmer.API/Android/data/tess-data
+    tesstrained_data.files = $$PWD/tess-two/data/tess-data/*
+    INSTALLS += tesstrained_data
