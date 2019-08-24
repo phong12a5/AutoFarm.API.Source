@@ -897,7 +897,7 @@ QJsonObject AutoFarmerAPI::getTextFromImage(QString imagePath, QString lang)
         static int initRetval;
         if(api == nullptr){
             api = new tesseract::TessBaseAPI();
-            initRetval = api->Init(QDir::currentPath().toUtf8().constData(), lang.toUtf8().constData());
+            initRetval = api->Init("/sdcard/DCIM/tessdata", lang.toUtf8().constData());
         }
 
         // Initialize tesseract-ocr with English, without specifying tessdata path
