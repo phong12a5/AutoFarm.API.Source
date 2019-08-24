@@ -897,38 +897,48 @@ QJsonObject AutoFarmerAPI::getTextFromImage(QString imagePath, QString lang)
         static int initRetval;
         if(api == nullptr){
             api = new tesseract::TessBaseAPI();
-            initRetval = api->Init("/sdcard/DCIM/tessdata", lang.toUtf8().constData());
+            LOG_DEBUG <<  "Initialize tesseract-ocr with English, without specifying tessdata path";
+            initRetval = api->Init("/sdcard/DCIM/tessdata/", lang.toUtf8().constData());
         }
 
-        // Initialize tesseract-ocr with English, without specifying tessdata path
         if (initRetval) {
-            message = "Could not initialize tesseract";
+            LOG_DEBUG <<  "Could not initialize tesseract.";
+            message = "Could not initialize tesseract.";
             status = false;
-            // Destroy used object and release memory
-            api->End();
         }else{
             status = true;
             Pix *image = pixRead(imagePath.toUtf8().constData());
-            api->SetImage(image);
-            Boxa* boxes = api->GetComponentImages(tesseract::RIL_TEXTLINE, true, NULL, NULL);
-            for (int i = 0; i < boxes->n; i++) {
-                BOX* box = boxaGetBox(boxes, i, L_CLONE);
-                api->SetRectangle(box->x, box->y, box->w, box->h);
-                char* ocrResult = api->GetUTF8Text();
-                int conf = api->MeanTextConf();
-                QJsonObject obj;
-                obj["index"] = i;
-                obj["x"] = box->x;
-                obj["y"] = box->x;
-                obj["width"] = box->w;
-                obj["height"] = box->h;
-                obj["confidence"] = conf;
-                obj["text"] = ocrResult;
-                retVal.append(QJsonValue(obj));
+            if(image != nullptr){
+                api->SetImage(image);
+                Boxa* boxes = api->GetComponentImages(tesseract::RIL_TEXTLINE, true, NULL, NULL);
+                if(boxes != nullptr){
+                    for (int i = 0; i < boxes->n; i++) {
+                        BOX* box = boxaGetBox(boxes, i, L_CLONE);
+                        api->SetRectangle(box->x, box->y, box->w, box->h);
+                        char* ocrResult = api->GetUTF8Text();
+                        int conf = api->MeanTextConf();
+                        QJsonObject obj;
+                        obj["index"] = i;
+                        obj["x"] = box->x;
+                        obj["y"] = box->x;
+                        obj["width"] = box->w;
+                        obj["height"] = box->h;
+                        obj["confidence"] = conf;
+                        obj["text"] = ocrResult;
+                        retVal.append(QJsonValue(obj));
+                    }
+                    LOG_DEBUG <<  "Destroy used object and release memory";
+                    pixDestroy(&image);
+                }else{
+                    LOG_DEBUG <<  "Could not GetComponentImages";
+                    message = "Could not GetComponentImages";
+                    status = false;
+                }
+            }else{
+                LOG_DEBUG <<  "Could not read " << imagePath;
+                message =  "Could not read image";
+                status = false;
             }
-            // Destroy used object and release memory
-            api->End();
-            pixDestroy(&image);
         }
     }
 
